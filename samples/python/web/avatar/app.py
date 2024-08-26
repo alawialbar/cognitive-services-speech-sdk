@@ -181,6 +181,11 @@ def connectAvatar() -> Response:
         connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
         connection.set_message_property('speech.config', 'context', json.dumps(avatar_config))
 
+        SystemPrompt = request.headers.get('SystemPrompt')
+        print(f'System Prompt: {SystemPrompt}')
+        initializeChatContext(SystemPrompt, client_id)
+        client_context['chat_initiated'] = True
+
         speech_sythesis_result = speech_synthesizer.speak_text_async('').get()
         print(f'Result id for avatar connection: {speech_sythesis_result.result_id}')
         if speech_sythesis_result.reason == speechsdk.ResultReason.Canceled:
@@ -191,7 +196,7 @@ def connectAvatar() -> Response:
                 raise Exception(cancellation_details.error_details)
         turn_start_message = speech_synthesizer.properties.get_property_by_name('SpeechSDKInternal-ExtraTurnStartMessage')
         remoteSdp = json.loads(turn_start_message)['webrtc']['connectionString']
-
+        
         return Response(remoteSdp, status=200)
 
     except Exception as e:
@@ -235,11 +240,15 @@ def chat() -> Response:
     global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
     client_context = client_contexts[client_id]
-    chat_initiated = client_context['chat_initiated']
-    if not chat_initiated:
-        initializeChatContext(request.headers.get('SystemPrompt'), client_id)
-        client_context['chat_initiated'] = True
+    #chat_initiated = client_context['chat_initiated']
+    #system_prompt = request.headers.get('SystemPrompt')
+    #if not chat_initiated:
+    #    initializeChatContext(system_prompt, client_id)
+    #    client_context['chat_initiated'] = True
     user_query = request.data.decode('utf-8')
+    messages = client_context['messages']
+    print(f'Chat Message: {messages}')
+    
     return Response(handleUserQuery(user_query, client_id), mimetype='text/plain', status=200)
 
 # The API route to clear the chat history
@@ -248,7 +257,8 @@ def clearChatHistory() -> Response:
     global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
     client_context = client_contexts[client_id]
-    initializeChatContext(request.headers.get('SystemPrompt'), client_id)
+    system_prompt = request.headers.get('SystemPrompt')
+    initializeChatContext(system_prompt, client_id)
     client_context['chat_initiated'] = True
     return Response('Chat history cleared.', status=200)
 

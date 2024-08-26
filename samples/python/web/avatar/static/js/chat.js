@@ -219,6 +219,8 @@ function connectToAvatarService(peerConnection) {
         headers['PersonalVoiceSpeakerProfileId'] = document.getElementById('personalVoiceSpeakerProfileID').value
     }
 
+    headers['SystemPrompt'] = document.getElementById('prompt').value.replace(/[\n\r]/g, "") + '\n\n' + document.getElementById('interview_questions').value.replace(/[\n\r]/g, "")
+    
     fetch('/api/connectAvatar', {
         method: 'POST',
         headers: headers,
@@ -240,11 +242,12 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
+    system_prompt = document.getElementById('prompt').value.replace(/[\n\r]/g, "") + '\n\n' + document.getElementById('interview_questions').value.replace(/[\n\r]/g, "")
     fetch('/api/chat', {
         method: 'POST',
         headers: {
             'ClientId': clientId,
-            'SystemPrompt': document.getElementById('prompt').value,
+            'SystemPrompt': system_prompt,
             'Content-Type': 'text/plain'
         },
         body: userQuery
@@ -415,11 +418,13 @@ window.stopSession = () => {
 }
 
 window.clearChatHistory = () => {
+    system_prompt = document.getElementById('prompt').value + document.getElementById('interview_questions').value
     fetch('/api/chat/clearHistory', {
         method: 'POST',
         headers: {
             'ClientId': clientId,
-            'SystemPrompt': document.getElementById('prompt').value
+            'SystemPrompt': system_prompt,
+            'Content-Type': 'text/plain'
         },
         body: ''
     })
