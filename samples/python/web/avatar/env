@@ -1,0 +1,6 @@
+export SPEECH_REGION=swedencentral
+export SPEECH_KEY=3a5ebd71eec64fe4ba008720d7c0a1da
+export SPEECH_RESOURCE_URL=https://swedencentral.api.cognitive.microsoft.com/
+export AZURE_OPENAI_ENDPOINT=https://alawi-aoai.openai.azure.com/
+export AZURE_OPENAI_API_KEY=7af2ae8d53d745ac9a889089dba246a5
+export AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o
